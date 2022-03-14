@@ -130,6 +130,10 @@ type RuntimeComponentSpec struct {
 
 	// +operator-sdk:csv:customresourcedefinitions:order=24,type=spec,displayName="Affinity"
 	Affinity *RuntimeComponentAffinity `json:"affinity,omitempty"`
+
+	// Create NetworkPolicy resources
+	// +operator-sdk:csv:customresourcedefinitions:order=25,type=spec,displayName="Create Network Policies",xDescriptors="urn:alm:descriptor:com.tectonic.ui:booleanSwitch"
+	CreateNetworkPolicies *bool `json:"createNetworkPolicies,omitempty"`
 }
 
 // Define health checks on application container to determine whether it is alive or ready to receive traffic
@@ -357,7 +361,7 @@ const (
 // +kubebuilder:printcolumn:name="Reason",type="string",JSONPath=".status.conditions[?(@.type=='Reconciled')].reason",priority=1,description="Reason for the failure of reconcile condition"
 // +kubebuilder:printcolumn:name="Message",type="string",JSONPath=".status.conditions[?(@.type=='Reconciled')].message",priority=1,description="Failure message from reconcile condition"
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp",priority=0,description="Age of the resource"
-//+operator-sdk:csv:customresourcedefinitions:displayName="RuntimeComponent",resources={{Deployment,v1},{Service,v1},{StatefulSet,v1},{Route,v1},{HorizontalPodAutoscaler,v1},{ServiceAccount,v1},{Secret,v1}}
+// +operator-sdk:csv:customresourcedefinitions:displayName="RuntimeComponent",resources={{Deployment,v1},{Service,v1},{StatefulSet,v1},{Route,v1},{HorizontalPodAutoscaler,v1},{ServiceAccount,v1},{Secret,v1}}
 
 // Represents the deployment of a runtime component
 type RuntimeComponent struct {
@@ -461,6 +465,11 @@ func (cr *RuntimeComponent) GetEnvFrom() []corev1.EnvFromSource {
 // GetCreateKnativeService returns flag that toggles Knative service
 func (cr *RuntimeComponent) GetCreateKnativeService() *bool {
 	return cr.Spec.CreateKnativeService
+}
+
+// GetCreateKnativeService returns flag that toggles Knative service
+func (cr *RuntimeComponent) GetCreateNetworkPolicies() *bool {
+	return cr.Spec.CreateNetworkPolicies
 }
 
 // GetAutoscaling returns autoscaling settings

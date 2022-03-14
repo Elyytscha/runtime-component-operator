@@ -243,6 +243,64 @@ func CustomizeService(svc *corev1.Service, ba common.BaseComponent) {
 	}
 }
 
+// CustomizeNetworkPolicy ...
+func CustomizeNetworkPolicy(networkPolicy *networkingv1.NetworkPolicy, ba common.BaseComponent) {
+	obj := ba.(metav1.Object)
+	networkPolicy.Labels = ba.GetLabels()
+	networkPolicy.Annotations = MergeMaps(networkPolicy.Annotations, ba.GetAnnotations())
+
+	if len(networkPolicy.Spec.Ingress) == 0 {
+		networkPolicy.Spec.Ingress = append(networkPolicy.Spec.Ingress, networkingv1.NetworkPolicyIngressRule{})
+	}
+
+	ingress := &networkPolicy.Spec.Ingress[0]
+
+	if len(ingress.From) == 0 {
+		ingress.From = append(ingress.From, networkingv1.NetworkPolicyPeer{})
+	}
+
+	networkPolicy.Spec.PolicyTypes = []networkingv1.PolicyType{networkingv1.PolicyTypeIngress}
+
+	// NetworkPolicy only applies the targeted pods
+	networkPolicy.Spec.PodSelector = metav1.LabelSelector{
+		MatchLabels: map[string]string{
+			"app.kubernetes.io/instance": obj.GetName(),
+		},
+	}
+
+	ingress.From[0] = networkingv1.NetworkPolicyPeer{
+		NamespaceSelector: &metav1.LabelSelector{
+			MatchLabels: map[string]string{},
+		},
+	}
+
+	var ports []int32
+	ports = append(ports, ba.GetService().GetPort())
+	for _, port := range ba.GetService().GetPorts() {
+		ports = append(ports, port.Port)
+	}
+
+	currentLen := len(ingress.Ports)
+	desiredLen := len(ba.GetService().GetPorts()) + 1 // Add one for normal port
+
+	// Shrink if needed
+	if currentLen > desiredLen {
+		ingress.Ports = ingress.Ports[:desiredLen]
+		currentLen = desiredLen
+	}
+
+	// Add additional ports needed
+	for currentLen < desiredLen {
+		ingress.Ports = append(ingress.Ports, networkingv1.NetworkPolicyPort{})
+		currentLen++
+	}
+
+	for i, port := range ports {
+		newPort := &intstr.IntOrString{Type: intstr.Int, IntVal: port}
+		ingress.Ports[i].Port = newPort
+	}
+}
+
 // CustomizeAffinity ...
 func CustomizeAffinity(affinity *corev1.Affinity, ba common.BaseComponent) {
 
@@ -552,7 +610,7 @@ func CustomizeKnativeService(ksvc *servingv1.Service, ba common.BaseComponent) {
 
 	ksvc.Spec.Template.Spec.Containers[0].Image = ba.GetStatus().GetImageReference()
 	// Knative sets its own resource constraints
-	//ksvc.Spec.Template.Spec.Containers[0].Resources = *cr.Spec.ResourceConstraints
+	// ksvc.Spec.Template.Spec.Containers[0].Resources = *cr.Spec.ResourceConstraints
 
 	if ba.GetProbes() != nil {
 		ksvc.Spec.Template.Spec.Containers[0].ReadinessProbe = ba.GetProbes().GetReadinessProbe()

@@ -153,7 +153,7 @@ func (r *RuntimeComponentReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		return r.ManageError(err, common.StatusConditionTypeReconciled, instance)
 	}
 
-	//currentGen := instance.Generation
+	// currentGen := instance.Generation
 	// if currentGen == 1 {
 	// 	return reconcile.Result{RequeueAfter: common.ReconcileInterval * time.Second}, nil
 	// }
@@ -304,6 +304,19 @@ func (r *RuntimeComponentReconciler) Reconcile(ctx context.Context, req ctrl.Req
 	if err != nil {
 		reqLogger.Error(err, "Failed to reconcile Service")
 		return r.ManageError(err, common.StatusConditionTypeReconciled, instance)
+	}
+
+	if instance.Spec.CreateNetworkPolicies != nil && *instance.Spec.CreateNetworkPolicies {
+		networkPolicy := &networkingv1.NetworkPolicy{ObjectMeta: defaultMeta}
+		err = r.CreateOrUpdate(networkPolicy, instance, func() error {
+			appstacksutils.CustomizeNetworkPolicy(networkPolicy, instance)
+			return nil
+		})
+
+		if err != nil {
+			reqLogger.Error(err, "Failed to reconcile network policy")
+			return r.ManageError(err, common.StatusConditionTypeReconciled, instance)
+		}
 	}
 
 	if instance.Spec.StatefulSet != nil {

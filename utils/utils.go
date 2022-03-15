@@ -249,6 +249,24 @@ func CustomizeNetworkPolicy(networkPolicy *networkingv1.NetworkPolicy, ba common
 	networkPolicy.Labels = ba.GetLabels()
 	networkPolicy.Annotations = MergeMaps(networkPolicy.Annotations, ba.GetAnnotations())
 
+	networkPolicy.Spec.PolicyTypes = []networkingv1.PolicyType{networkingv1.PolicyTypeIngress}
+
+	networkPolicy.Spec.PodSelector = metav1.LabelSelector{
+		MatchLabels: map[string]string{
+			"app.kubernetes.io/instance": obj.GetName(),
+		},
+	}
+
+	ingressConfig := ba.GetNetworkPolicy().GetIngress()
+	if ingressConfig == nil {
+		customizeDefaultNetworkPolicyIngress(networkPolicy, ba)
+		return
+	}
+
+	networkPolicy.Spec.Ingress = ingressConfig
+}
+
+func customizeDefaultNetworkPolicyIngress(networkPolicy *networkingv1.NetworkPolicy, ba common.BaseComponent) {
 	if len(networkPolicy.Spec.Ingress) == 0 {
 		networkPolicy.Spec.Ingress = append(networkPolicy.Spec.Ingress, networkingv1.NetworkPolicyIngressRule{})
 	}
@@ -257,15 +275,6 @@ func CustomizeNetworkPolicy(networkPolicy *networkingv1.NetworkPolicy, ba common
 
 	if len(ingress.From) == 0 {
 		ingress.From = append(ingress.From, networkingv1.NetworkPolicyPeer{})
-	}
-
-	networkPolicy.Spec.PolicyTypes = []networkingv1.PolicyType{networkingv1.PolicyTypeIngress}
-
-	// NetworkPolicy only applies the targeted pods
-	networkPolicy.Spec.PodSelector = metav1.LabelSelector{
-		MatchLabels: map[string]string{
-			"app.kubernetes.io/instance": obj.GetName(),
-		},
 	}
 
 	ingress.From[0] = networkingv1.NetworkPolicyPeer{

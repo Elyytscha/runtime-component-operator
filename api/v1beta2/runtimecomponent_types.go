@@ -131,9 +131,12 @@ type RuntimeComponentSpec struct {
 	// +operator-sdk:csv:customresourcedefinitions:order=24,type=spec,displayName="Affinity"
 	Affinity *RuntimeComponentAffinity `json:"affinity,omitempty"`
 
-	// Create NetworkPolicy resources
-	// +operator-sdk:csv:customresourcedefinitions:order=25,type=spec,displayName="Create Network Policies",xDescriptors="urn:alm:descriptor:com.tectonic.ui:booleanSwitch"
-	CreateNetworkPolicies *bool `json:"createNetworkPolicies,omitempty"`
+	// Create the NetworkPolicy resource
+	// +operator-sdk:csv:customresourcedefinitions:order=25,type=spec,displayName="Create Network Policy",xDescriptors="urn:alm:descriptor:com.tectonic.ui:booleanSwitch"
+	CreateNetworkPolicy *bool `json:"createNetworkPolicy,omitempty"`
+
+	// +operator-sdk:csv:customresourcedefinitions:order=26,type=spec,displayName="Network Policy"
+	NetworkPolicy *RuntimeComponentNetworkPolicy `json:"networkPolicy,omitempty"`
 }
 
 // Define health checks on application container to determine whether it is alive or ready to receive traffic
@@ -234,6 +237,11 @@ type RuntimeComponentService struct {
 	// Expose the application as a bindable service. Defaults to false.
 	// +operator-sdk:csv:customresourcedefinitions:order=17,type=spec,displayName="Bindable",xDescriptors="urn:alm:descriptor:com.tectonic.ui:booleanSwitch"
 	Bindable *bool `json:"bindable,omitempty"`
+}
+
+// RuntimeComponentNetworkPolicy configures the network policy
+type RuntimeComponentNetworkPolicy struct {
+	Ingress []networkingv1.NetworkPolicyIngressRule `json:"ingress,omitempty"`
 }
 
 // Defines the desired state and cycle of applications.
@@ -467,9 +475,9 @@ func (cr *RuntimeComponent) GetCreateKnativeService() *bool {
 	return cr.Spec.CreateKnativeService
 }
 
-// GetCreateKnativeService returns flag that toggles Knative service
-func (cr *RuntimeComponent) GetCreateNetworkPolicies() *bool {
-	return cr.Spec.CreateNetworkPolicies
+// GetCreateNetworkPolicy returns true if a NetworkPolicy should be generated
+func (cr *RuntimeComponent) GetCreateNetworkPolicy() *bool {
+	return cr.Spec.CreateNetworkPolicy
 }
 
 // GetAutoscaling returns autoscaling settings
@@ -494,6 +502,10 @@ func (cr *RuntimeComponent) GetService() common.BaseComponentService {
 		return nil
 	}
 	return cr.Spec.Service
+}
+
+func (cr *RuntimeComponent) GetNetworkPolicy() common.BaseComponentNetworkPolicy {
+	return cr.Spec.NetworkPolicy
 }
 
 // GetApplicationVersion returns application version
@@ -682,6 +694,10 @@ func (s *RuntimeComponentService) GetCertificateSecretRef() *string {
 // GetBindable returns whether the application should be exposable as a service
 func (s *RuntimeComponentService) GetBindable() *bool {
 	return s.Bindable
+}
+
+func (np *RuntimeComponentNetworkPolicy) GetIngress() []networkingv1.NetworkPolicyIngressRule {
+	return np.Ingress
 }
 
 // GetLabels returns labels to be added on ServiceMonitor

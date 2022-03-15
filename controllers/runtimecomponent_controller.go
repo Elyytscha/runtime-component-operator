@@ -306,7 +306,7 @@ func (r *RuntimeComponentReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		return r.ManageError(err, common.StatusConditionTypeReconciled, instance)
 	}
 
-	if instance.Spec.CreateNetworkPolicies != nil && *instance.Spec.CreateNetworkPolicies {
+	if instance.Spec.CreateNetworkPolicy != nil && *instance.Spec.CreateNetworkPolicy {
 		networkPolicy := &networkingv1.NetworkPolicy{ObjectMeta: defaultMeta}
 		err = r.CreateOrUpdate(networkPolicy, instance, func() error {
 			appstacksutils.CustomizeNetworkPolicy(networkPolicy, instance)

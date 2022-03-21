@@ -237,9 +237,8 @@ type RuntimeComponentService struct {
 
 // RuntimeComponentNetworkPolicy configures the network policy
 type RuntimeComponentNetworkPolicy struct {
-	Enabled    *bool                                   `json:"enabled,omitempty"`
-	FromLabels map[string]string                       `json:"fromLabels,omitempty"`
-	Ingress    []networkingv1.NetworkPolicyIngressRule `json:"ingress,omitempty"`
+	Enabled    *bool             `json:"enabled,omitempty"`
+	FromLabels map[string]string `json:"fromLabels,omitempty"`
 }
 
 // Defines the desired state and cycle of applications.
@@ -694,13 +693,6 @@ func (np *RuntimeComponentNetworkPolicy) GetFromLabels() map[string]string {
 		return nil
 	}
 	return np.FromLabels
-}
-
-func (np *RuntimeComponentNetworkPolicy) GetIngress() []networkingv1.NetworkPolicyIngressRule {
-	if np == nil {
-		return nil
-	}
-	return np.Ingress
 }
 
 // GetLabels returns labels to be added on ServiceMonitor

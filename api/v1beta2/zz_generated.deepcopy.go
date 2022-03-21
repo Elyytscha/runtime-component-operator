@@ -26,7 +26,6 @@ import (
 	routev1 "github.com/openshift/api/route/v1"
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/api/core/v1"
-	networkingv1 "k8s.io/api/networking/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 )
 
@@ -245,13 +244,6 @@ func (in *RuntimeComponentNetworkPolicy) DeepCopyInto(out *RuntimeComponentNetwo
 		*out = make(map[string]string, len(*in))
 		for key, val := range *in {
 			(*out)[key] = val
-		}
-	}
-	if in.Ingress != nil {
-		in, out := &in.Ingress, &out.Ingress
-		*out = make([]networkingv1.NetworkPolicyIngressRule, len(*in))
-		for i := range *in {
-			(*in)[i].DeepCopyInto(&(*out)[i])
 		}
 	}
 }

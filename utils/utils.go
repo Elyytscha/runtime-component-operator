@@ -256,17 +256,6 @@ func CustomizeNetworkPolicy(networkPolicy *networkingv1.NetworkPolicy, ba common
 			"app.kubernetes.io/instance": obj.GetName(),
 		},
 	}
-
-	ingressConfig := ba.GetNetworkPolicy().GetIngress()
-	if ingressConfig == nil {
-		customizeDefaultNetworkPolicyIngress(networkPolicy, ba)
-		return
-	}
-
-	networkPolicy.Spec.Ingress = ingressConfig
-}
-
-func customizeDefaultNetworkPolicyIngress(networkPolicy *networkingv1.NetworkPolicy, ba common.BaseComponent) {
 	if len(networkPolicy.Spec.Ingress) == 0 {
 		networkPolicy.Spec.Ingress = append(networkPolicy.Spec.Ingress, networkingv1.NetworkPolicyIngressRule{})
 	}

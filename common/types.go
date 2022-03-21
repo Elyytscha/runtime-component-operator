@@ -77,7 +77,6 @@ type BaseComponentService interface {
 // BaseComponentNetworkPolicy represents a basic network policy configuration
 type BaseComponentNetworkPolicy interface {
 	GetFromLabels() map[string]string
-	GetIngress() []networkingv1.NetworkPolicyIngressRule
 }
 
 // BaseComponentMonitoring represents basic service monitoring configuration

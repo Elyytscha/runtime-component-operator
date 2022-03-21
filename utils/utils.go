@@ -283,6 +283,12 @@ func customizeDefaultNetworkPolicyIngress(networkPolicy *networkingv1.NetworkPol
 		},
 	}
 
+	if ps := ba.GetNetworkPolicy().GetFromLabels(); ps != nil {
+		ingress.From[0].PodSelector = &metav1.LabelSelector{
+			MatchLabels: ps,
+		}
+	}
+
 	var ports []int32
 	ports = append(ports, ba.GetService().GetPort())
 	for _, port := range ba.GetService().GetPorts() {

@@ -131,10 +131,6 @@ type RuntimeComponentSpec struct {
 	// +operator-sdk:csv:customresourcedefinitions:order=24,type=spec,displayName="Affinity"
 	Affinity *RuntimeComponentAffinity `json:"affinity,omitempty"`
 
-	// Create the NetworkPolicy resource
-	// +operator-sdk:csv:customresourcedefinitions:order=25,type=spec,displayName="Create Network Policy",xDescriptors="urn:alm:descriptor:com.tectonic.ui:booleanSwitch"
-	CreateNetworkPolicy *bool `json:"createNetworkPolicy,omitempty"`
-
 	// +operator-sdk:csv:customresourcedefinitions:order=26,type=spec,displayName="Network Policy"
 	NetworkPolicy *RuntimeComponentNetworkPolicy `json:"networkPolicy,omitempty"`
 }
@@ -241,7 +237,9 @@ type RuntimeComponentService struct {
 
 // RuntimeComponentNetworkPolicy configures the network policy
 type RuntimeComponentNetworkPolicy struct {
-	Ingress []networkingv1.NetworkPolicyIngressRule `json:"ingress,omitempty"`
+	Enabled    *bool                                   `json:"enabled,omitempty"`
+	FromLabels map[string]string                       `json:"fromLabels,omitempty"`
+	Ingress    []networkingv1.NetworkPolicyIngressRule `json:"ingress,omitempty"`
 }
 
 // Defines the desired state and cycle of applications.
@@ -475,11 +473,6 @@ func (cr *RuntimeComponent) GetCreateKnativeService() *bool {
 	return cr.Spec.CreateKnativeService
 }
 
-// GetCreateNetworkPolicy returns true if a NetworkPolicy should be generated
-func (cr *RuntimeComponent) GetCreateNetworkPolicy() *bool {
-	return cr.Spec.CreateNetworkPolicy
-}
-
 // GetAutoscaling returns autoscaling settings
 func (cr *RuntimeComponent) GetAutoscaling() common.BaseComponentAutoscaling {
 	if cr.Spec.Autoscaling == nil {
@@ -696,7 +689,17 @@ func (s *RuntimeComponentService) GetBindable() *bool {
 	return s.Bindable
 }
 
+func (np *RuntimeComponentNetworkPolicy) GetFromLabels() map[string]string {
+	if np == nil {
+		return nil
+	}
+	return np.FromLabels
+}
+
 func (np *RuntimeComponentNetworkPolicy) GetIngress() []networkingv1.NetworkPolicyIngressRule {
+	if np == nil {
+		return nil
+	}
 	return np.Ingress
 }
 

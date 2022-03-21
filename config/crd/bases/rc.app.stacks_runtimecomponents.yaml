@@ -705,9 +705,6 @@ spec:
               createKnativeService:
                 description: Create Knative resources and use Knative serving.
                 type: boolean
-              createNetworkPolicy:
-                description: Create the NetworkPolicy resource
-                type: boolean
               deployment:
                 description: Defines the desired state and cycle of applications.
                 properties:
@@ -2368,6 +2365,12 @@ spec:
                 description: RuntimeComponentNetworkPolicy configures the network
                   policy
                 properties:
+                  enabled:
+                    type: boolean
+                  fromLabels:
+                    additionalProperties:
+                      type: string
+                    type: object
                   ingress:
                     items:
                       description: NetworkPolicyIngressRule describes a particular

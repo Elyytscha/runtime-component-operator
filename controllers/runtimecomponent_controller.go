@@ -163,6 +163,12 @@ func (r *RuntimeComponentReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		Namespace: instance.Namespace,
 	}
 
+	recctx := appstacksutils.ReconcileContext{
+		Ctx:    &ctx,
+		Req:    &req,
+		Logger: reqLogger,
+	}
+
 	imageReferenceOld := instance.Status.ImageReference
 	instance.Status.ImageReference = instance.Spec.ApplicationImage
 	if r.IsOpenShift() {
@@ -275,6 +281,7 @@ func (r *RuntimeComponentReconciler) Reconcile(ctx context.Context, req ctrl.Req
 				reqLogger.Error(err, "Failed to reconcile Knative Service")
 				return r.ManageError(err, common.StatusConditionTypeReconciled, instance)
 			}
+			r.ReconcilerBase.CheckComponentStatus(&recctx, instance)
 			return r.ManageSuccess(common.StatusConditionTypeReconciled, instance)
 		}
 		return r.ManageError(errors.New("failed to reconcile Knative service as operator could not find Knative CRDs"), common.StatusConditionTypeReconciled, instance)
@@ -442,6 +449,9 @@ func (r *RuntimeComponentReconciler) Reconcile(ctx context.Context, req ctrl.Req
 			}
 		}
 	}
+
+	//Check resources (Deployments/StatefulSets)
+	r.ReconcilerBase.CheckComponentStatus(&recctx, instance)
 
 	if ok, err := r.IsGroupVersionSupported(prometheusv1.SchemeGroupVersion.String(), "ServiceMonitor"); err != nil {
 		reqLogger.Error(err, fmt.Sprintf("Failed to check if %s is supported", prometheusv1.SchemeGroupVersion.String()))

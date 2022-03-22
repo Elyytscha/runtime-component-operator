@@ -44,7 +44,8 @@ type BaseComponentStatus interface {
 
 const (
 	// StatusConditionTypeReconciled ...
-	StatusConditionTypeReconciled StatusConditionType = "Reconciled"
+	StatusConditionTypeReconciled        StatusConditionType = "Reconciled"
+	StatusConditionTypeResourceAvailable StatusConditionType = "Available"
 )
 
 // BaseComponentAutoscaling represents basic HPA configuration

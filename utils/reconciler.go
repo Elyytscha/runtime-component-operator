@@ -7,6 +7,7 @@ import (
 
 	appstacksv1beta2 "github.com/application-stacks/runtime-component-operator/api/v1beta2"
 	"github.com/application-stacks/runtime-component-operator/common"
+	"github.com/go-logr/logr"
 	routev1 "github.com/openshift/api/route/v1"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -38,6 +39,12 @@ type ReconcilerBase struct {
 	restConfig *rest.Config
 	discovery  discovery.DiscoveryInterface
 	controller controller.Controller
+}
+
+type ReconcileContext struct {
+	Ctx    *context.Context
+	Req    *reconcile.Request
+	Logger logr.Logger
 }
 
 //NewReconcilerBase creates a new ReconcilerBase

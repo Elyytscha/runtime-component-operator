@@ -345,7 +345,8 @@ type StatusConditionType string
 
 const (
 	// StatusConditionTypeReconciled ...
-	StatusConditionTypeReconciled StatusConditionType = "Reconciled"
+	StatusConditionTypeReconciled        StatusConditionType = "Reconciled"
+	StatusConditionTypeResourceAvailable StatusConditionType = "Available"
 )
 
 // +kubebuilder:resource:path=runtimecomponents,scope=Namespaced,shortName=comp;comps
@@ -920,6 +921,8 @@ func convertToCommonStatusConditionType(c StatusConditionType) common.StatusCond
 	switch c {
 	case StatusConditionTypeReconciled:
 		return common.StatusConditionTypeReconciled
+	case StatusConditionTypeResourceAvailable:
+		return common.StatusConditionTypeResourceAvailable
 	default:
 		panic(c)
 	}
@@ -929,6 +932,8 @@ func convertFromCommonStatusConditionType(c common.StatusConditionType) StatusCo
 	switch c {
 	case common.StatusConditionTypeReconciled:
 		return StatusConditionTypeReconciled
+	case common.StatusConditionTypeResourceAvailable:
+		return StatusConditionTypeResourceAvailable
 	default:
 		panic(c)
 	}

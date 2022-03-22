@@ -5,7 +5,7 @@ metadata:
 spec:
   applicationImage: k8s.gcr.io/pause:2.0
   networkPolicy:
-    enabled: true
+    enable: true
   service:
     port: 8080
     ports:

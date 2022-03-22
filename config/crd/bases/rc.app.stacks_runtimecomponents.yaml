@@ -2362,14 +2362,16 @@ spec:
                     type: object
                 type: object
               networkPolicy:
-                description: RuntimeComponentNetworkPolicy configures the network
-                  policy
+                description: Defines the network policy
                 properties:
-                  enabled:
+                  enable:
+                    description: Create the network policy. Default to false.
                     type: boolean
                   fromLabels:
                     additionalProperties:
                       type: string
+                    description: Specify the labels of pod(s) that incoming traffic
+                      is allowed from.
                     type: object
                 type: object
               probes:

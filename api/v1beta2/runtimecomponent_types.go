@@ -131,7 +131,7 @@ type RuntimeComponentSpec struct {
 	// +operator-sdk:csv:customresourcedefinitions:order=24,type=spec,displayName="Affinity"
 	Affinity *RuntimeComponentAffinity `json:"affinity,omitempty"`
 
-	// +operator-sdk:csv:customresourcedefinitions:order=26,type=spec,displayName="Network Policy"
+	// +operator-sdk:csv:customresourcedefinitions:order=44,type=spec,displayName="Network Policy"
 	NetworkPolicy *RuntimeComponentNetworkPolicy `json:"networkPolicy,omitempty"`
 }
 
@@ -235,9 +235,14 @@ type RuntimeComponentService struct {
 	Bindable *bool `json:"bindable,omitempty"`
 }
 
-// RuntimeComponentNetworkPolicy configures the network policy
+// Defines the network policy
 type RuntimeComponentNetworkPolicy struct {
-	Enabled    *bool             `json:"enabled,omitempty"`
+	// Create the network policy. Default to false.
+	// +operator-sdk:csv:customresourcedefinitions:order=45,type=spec,displayName="Enable",xDescriptors="urn:alm:descriptor:com.tectonic.ui:booleanSwitch"
+	Enable *bool `json:"enable,omitempty"`
+
+	// Specify the labels of pod(s) that incoming traffic is allowed from.
+	// +operator-sdk:csv:customresourcedefinitions:order=46,type=spec,displayName="From Labels",xDescriptors="urn:alm:descriptor:com.tectonic.ui:text"
 	FromLabels map[string]string `json:"fromLabels,omitempty"`
 }
 
@@ -366,7 +371,7 @@ const (
 // +kubebuilder:printcolumn:name="Reason",type="string",JSONPath=".status.conditions[?(@.type=='Reconciled')].reason",priority=1,description="Reason for the failure of reconcile condition"
 // +kubebuilder:printcolumn:name="Message",type="string",JSONPath=".status.conditions[?(@.type=='Reconciled')].message",priority=1,description="Failure message from reconcile condition"
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp",priority=0,description="Age of the resource"
-// +operator-sdk:csv:customresourcedefinitions:displayName="RuntimeComponent",resources={{Deployment,v1},{Service,v1},{StatefulSet,v1},{Route,v1},{HorizontalPodAutoscaler,v1},{ServiceAccount,v1},{Secret,v1}}
+// +operator-sdk:csv:customresourcedefinitions:displayName="RuntimeComponent",resources={{Deployment,v1},{Service,v1},{StatefulSet,v1},{Route,v1},{HorizontalPodAutoscaler,v1},{ServiceAccount,v1},{Secret,v1}},{NetworkPolicy,v1}
 
 // Represents the deployment of a runtime component
 type RuntimeComponent struct {

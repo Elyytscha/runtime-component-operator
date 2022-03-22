@@ -306,13 +306,17 @@ func (r *RuntimeComponentReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		return r.ManageError(err, common.StatusConditionTypeReconciled, instance)
 	}
 
-	if np := instance.Spec.NetworkPolicy; np == nil || np.Enabled == nil || *np.Enabled {
-		networkPolicy := &networkingv1.NetworkPolicy{ObjectMeta: defaultMeta}
+	networkPolicy := &networkingv1.NetworkPolicy{ObjectMeta: defaultMeta}
+	if np := instance.Spec.NetworkPolicy; np == nil || np.Enabled == nil || !*np.Enabled {
+		if err := r.DeleteResource(networkPolicy); err != nil {
+			reqLogger.Error(err, "Failed to delete network policy")
+			return r.ManageError(err, common.StatusConditionTypeReconciled, instance)
+		}
+	} else {
 		err = r.CreateOrUpdate(networkPolicy, instance, func() error {
 			appstacksutils.CustomizeNetworkPolicy(networkPolicy, instance)
 			return nil
 		})
-
 		if err != nil {
 			reqLogger.Error(err, "Failed to reconcile network policy")
 			return r.ManageError(err, common.StatusConditionTypeReconciled, instance)

@@ -281,7 +281,7 @@ func (r *RuntimeComponentReconciler) Reconcile(ctx context.Context, req ctrl.Req
 				reqLogger.Error(err, "Failed to reconcile Knative Service")
 				return r.ManageError(err, common.StatusConditionTypeReconciled, instance)
 			}
-			r.ReconcilerBase.CheckComponentStatus(&recctx, instance)
+			r.ReconcilerBase.CheckResourceStatus(&recctx, instance, defaultMeta)
 			return r.ManageSuccess(common.StatusConditionTypeReconciled, instance)
 		}
 		return r.ManageError(errors.New("failed to reconcile Knative service as operator could not find Knative CRDs"), common.StatusConditionTypeReconciled, instance)
@@ -450,8 +450,8 @@ func (r *RuntimeComponentReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		}
 	}
 
-	//Check resources (Deployments/StatefulSets)
-	r.ReconcilerBase.CheckComponentStatus(&recctx, instance)
+	//Check resource status (Deployments/StatefulSets)
+	r.ReconcilerBase.CheckResourceStatus(&recctx, instance, defaultMeta)
 
 	if ok, err := r.IsGroupVersionSupported(prometheusv1.SchemeGroupVersion.String(), "ServiceMonitor"); err != nil {
 		reqLogger.Error(err, fmt.Sprintf("Failed to check if %s is supported", prometheusv1.SchemeGroupVersion.String()))

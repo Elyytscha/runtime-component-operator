@@ -345,8 +345,9 @@ type StatusConditionType string
 
 const (
 	// StatusConditionTypeReconciled ...
-	StatusConditionTypeReconciled        StatusConditionType = "Reconciled"
-	StatusConditionTypeResourceAvailable StatusConditionType = "Available"
+	StatusConditionTypeReconciled     StatusConditionType = "Reconciled"
+	StatusConditionTypeResourceReady  StatusConditionType = "ResourceReady"
+	StatusConditionTypeComponentReady StatusConditionType = "Ready"
 )
 
 // +kubebuilder:resource:path=runtimecomponents,scope=Namespaced,shortName=comp;comps
@@ -355,8 +356,14 @@ const (
 // +kubebuilder:printcolumn:name="Image",type="string",JSONPath=".spec.applicationImage",priority=0,description="Absolute name of the deployed image containing registry and tag"
 // +kubebuilder:printcolumn:name="Exposed",type="boolean",JSONPath=".spec.expose",priority=0,description="Specifies whether deployment is exposed externally via default Route"
 // +kubebuilder:printcolumn:name="Reconciled",type="string",JSONPath=".status.conditions[?(@.type=='Reconciled')].status",priority=0,description="Status of the reconcile condition"
-// +kubebuilder:printcolumn:name="Reason",type="string",JSONPath=".status.conditions[?(@.type=='Reconciled')].reason",priority=1,description="Reason for the failure of reconcile condition"
-// +kubebuilder:printcolumn:name="Message",type="string",JSONPath=".status.conditions[?(@.type=='Reconciled')].message",priority=1,description="Failure message from reconcile condition"
+// +kubebuilder:printcolumn:name="ReconcileReason",type="string",JSONPath=".status.conditions[?(@.type=='Reconciled')].reason",priority=1,description="Reason for the failure of reconcile condition"
+// +kubebuilder:printcolumn:name="ReconcileMessage",type="string",JSONPath=".status.conditions[?(@.type=='Reconciled')].message",priority=1,description="Failure message from reconcile condition"
+// +kubebuilder:printcolumn:name="ResourceReady",type="string",JSONPath=".status.conditions[?(@.type=='ResourceReady')].status",priority=0,description="Status of the resource ready condition"
+// +kubebuilder:printcolumn:name="ResourceReadyReason",type="string",JSONPath=".status.conditions[?(@.type=='ResourceReady')].reason",priority=1,description="Reason for the failure of resource ready condition"
+// +kubebuilder:printcolumn:name="ResourceReadyMessage",type="string",JSONPath=".status.conditions[?(@.type=='ResourceReady')].message",priority=1,description="Failure message from resource ready condition"
+// +kubebuilder:printcolumn:name="Ready",type="string",JSONPath=".status.conditions[?(@.type=='Ready')].status",priority=0,description="Status of the component ready condition"
+// +kubebuilder:printcolumn:name="ReadyReason",type="string",JSONPath=".status.conditions[?(@.type=='Ready')].reason",priority=1,description="Reason for the failure of component ready condition"
+// +kubebuilder:printcolumn:name="ReadyMessage",type="string",JSONPath=".status.conditions[?(@.type=='Ready')].message",priority=1,description="Failure message from component ready condition"
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp",priority=0,description="Age of the resource"
 //+operator-sdk:csv:customresourcedefinitions:displayName="RuntimeComponent",resources={{Deployment,v1},{Service,v1},{StatefulSet,v1},{Route,v1},{HorizontalPodAutoscaler,v1},{ServiceAccount,v1},{Secret,v1}}
 
@@ -921,8 +928,10 @@ func convertToCommonStatusConditionType(c StatusConditionType) common.StatusCond
 	switch c {
 	case StatusConditionTypeReconciled:
 		return common.StatusConditionTypeReconciled
-	case StatusConditionTypeResourceAvailable:
-		return common.StatusConditionTypeResourceAvailable
+	case StatusConditionTypeResourceReady:
+		return common.StatusConditionTypeResourceReady
+	case StatusConditionTypeComponentReady:
+		return common.StatusConditionTypeComponentReady
 	default:
 		panic(c)
 	}
@@ -932,8 +941,10 @@ func convertFromCommonStatusConditionType(c common.StatusConditionType) StatusCo
 	switch c {
 	case common.StatusConditionTypeReconciled:
 		return StatusConditionTypeReconciled
-	case common.StatusConditionTypeResourceAvailable:
-		return StatusConditionTypeResourceAvailable
+	case common.StatusConditionTypeResourceReady:
+		return StatusConditionTypeResourceReady
+	case common.StatusConditionTypeComponentReady:
+		return StatusConditionTypeComponentReady
 	default:
 		panic(c)
 	}

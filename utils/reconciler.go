@@ -207,6 +207,9 @@ func (r *ReconcilerBase) ManageError(issue error, conditionType common.StatusCon
 
 	s.SetCondition(newCondition)
 
+	//Check Runtime Component status (reconciliation & resource status)
+	r.CheckComponentStatus(ba)
+
 	err := r.UpdateStatus(obj)
 	if err != nil {
 
@@ -271,7 +274,9 @@ func (r *ReconcilerBase) ManageSuccess(conditionType common.StatusConditionType,
 			Requeue:      true,
 		}, nil
 	}
-	return reconcile.Result{RequeueAfter: ReconcileInterval * time.Second}, nil
+
+	//Check Runtime Component status (reconciliation & resource status)
+	return r.CheckComponentStatus(ba)
 }
 
 // IsGroupVersionSupported ...

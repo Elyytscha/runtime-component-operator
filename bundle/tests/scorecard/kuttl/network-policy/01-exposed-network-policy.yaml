@@ -7,4 +7,6 @@ spec:
   expose: true
   service:
     port: 8080
-    ports: []
+    ports:
+      - port: 9090
+        protocol: TCP

@@ -237,7 +237,7 @@ type RuntimeComponentService struct {
 
 // Defines the network policy
 type RuntimeComponentNetworkPolicy struct {
-	// Create the network policy. Default to false.
+	// Create the network policy. Default to true.
 	// +operator-sdk:csv:customresourcedefinitions:order=45,type=spec,displayName="Enable",xDescriptors="urn:alm:descriptor:com.tectonic.ui:booleanSwitch"
 	Enable *bool `json:"enable,omitempty"`
 

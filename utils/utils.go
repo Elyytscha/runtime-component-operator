@@ -243,7 +243,10 @@ func CustomizeService(svc *corev1.Service, ba common.BaseComponent) {
 	}
 }
 
-// CustomizeNetworkPolicy ...
+// CustomizeNetworkPolicy configures a network policy that blocks all traffic by default. If the runtime component is
+// exposed, an ingress rule will be configured to allow traffic into the pod on the service port (and any additional
+// ports that were defined). If networkPolicy.fromLabels are specified, a similar ingress rule will be configured but
+// will only allow traffic from pods with the specified labels.
 func CustomizeNetworkPolicy(networkPolicy *networkingv1.NetworkPolicy, ba common.BaseComponent) {
 	obj := ba.(metav1.Object)
 	networkPolicy.Labels = ba.GetLabels()
@@ -260,8 +263,14 @@ func CustomizeNetworkPolicy(networkPolicy *networkingv1.NetworkPolicy, ba common
 		networkPolicy.Spec.Ingress = append(networkPolicy.Spec.Ingress, networkingv1.NetworkPolicyIngressRule{})
 	}
 
-	ingress := &networkPolicy.Spec.Ingress[0]
+	if exposed := ba.GetExpose(); exposed != nil && *exposed {
+		customizeNetworkPolicyIngressRule(&networkPolicy.Spec.Ingress[0], ba)
+	} else if fromLabels := ba.GetNetworkPolicy().GetFromLabels(); fromLabels != nil {
+		customizeNetworkPolicyIngressRule(&networkPolicy.Spec.Ingress[0], ba)
+	}
+}
 
+func customizeNetworkPolicyIngressRule(ingress *networkingv1.NetworkPolicyIngressRule, ba common.BaseComponent) {
 	if len(ingress.From) == 0 {
 		ingress.From = append(ingress.From, networkingv1.NetworkPolicyPeer{})
 	}
@@ -272,9 +281,9 @@ func CustomizeNetworkPolicy(networkPolicy *networkingv1.NetworkPolicy, ba common
 		},
 	}
 
-	if ps := ba.GetNetworkPolicy().GetFromLabels(); ps != nil {
+	if fromLabels := ba.GetNetworkPolicy().GetFromLabels(); fromLabels != nil {
 		ingress.From[0].PodSelector = &metav1.LabelSelector{
-			MatchLabels: ps,
+			MatchLabels: fromLabels,
 		}
 	}
 

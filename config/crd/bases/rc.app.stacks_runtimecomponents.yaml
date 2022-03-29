@@ -2365,7 +2365,7 @@ spec:
                 description: Defines the network policy
                 properties:
                   enable:
-                    description: Create the network policy. Default to false.
+                    description: Create the network policy. Default to true.
                     type: boolean
                   fromLabels:
                     additionalProperties:

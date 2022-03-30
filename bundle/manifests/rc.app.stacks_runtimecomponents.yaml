@@ -1323,6 +1323,8 @@ spec:
                 x-kubernetes-list-map-keys:
                 - name
                 x-kubernetes-list-type: map
+              manageTLS:
+                type: boolean
               monitoring:
                 description: Specifies parameters for Service Monitor.
                 properties:
@@ -3904,6 +3906,10 @@ spec:
                 x-kubernetes-list-type: atomic
               imageReference:
                 type: string
+              references:
+                additionalProperties:
+                  type: string
+                type: object
             type: object
         type: object
     served: true

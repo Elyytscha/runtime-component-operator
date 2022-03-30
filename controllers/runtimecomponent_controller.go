@@ -289,10 +289,22 @@ func (r *RuntimeComponentReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		}
 	}
 
+	useCertmanager, err := r.GenerateSvcCertSecret(ba, "rco", "Runtime Component Operator")
+	if err != nil {
+		reqLogger.Error(err, "Failed to reconcile CertManager Certificate")
+		return r.ManageError(err, common.StatusConditionTypeReconciled, instance)
+	}
+	if ba.GetService().GetCertificateSecretRef() != nil {
+		ba.GetStatus().SetReference(common.StatusReferenceCertSecretName, *ba.GetService().GetCertificateSecretRef())
+	}
+
 	svc := &corev1.Service{ObjectMeta: defaultMeta}
 	err = r.CreateOrUpdate(svc, instance, func() error {
 		appstacksutils.CustomizeService(svc, ba)
 		svc.Annotations = appstacksutils.MergeMaps(svc.Annotations, instance.Spec.Service.Annotations)
+		if !useCertmanager {
+			appstacksutils.AddOCPCertAnnotation(ba, svc)
+		}
 		monitoringEnabledLabelName := getMonitoringEnabledLabelName(ba)
 		if instance.Spec.Monitoring != nil {
 			svc.Labels[monitoringEnabledLabelName] = "true"
@@ -305,6 +317,8 @@ func (r *RuntimeComponentReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		reqLogger.Error(err, "Failed to reconcile Service")
 		return r.ManageError(err, common.StatusConditionTypeReconciled, instance)
 	}
+
+	reqLogger.Info("References", "Refs", ba.GetStatus().GetReferences())
 
 	if instance.Spec.StatefulSet != nil {
 		// Delete Deployment if exists
@@ -360,6 +374,9 @@ func (r *RuntimeComponentReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		err = r.CreateOrUpdate(deploy, instance, func() error {
 			appstacksutils.CustomizeDeployment(deploy, instance)
 			appstacksutils.CustomizePodSpec(&deploy.Spec.Template, instance)
+			if err := appstacksutils.CustomizePodWithSVCCertificate(&deploy.Spec.Template, instance, r.GetClient()); err != nil {
+				return err
+			}
 			return nil
 		})
 		if err != nil {

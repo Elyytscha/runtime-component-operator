@@ -130,6 +130,8 @@ type RuntimeComponentSpec struct {
 
 	// +operator-sdk:csv:customresourcedefinitions:order=24,type=spec,displayName="Affinity"
 	Affinity *RuntimeComponentAffinity `json:"affinity,omitempty"`
+
+	ManageTLS *bool `json:"manageTLS,omitempty"`
 }
 
 // Define health checks on application container to determine whether it is alive or ready to receive traffic
@@ -329,6 +331,8 @@ type RuntimeComponentStatus struct {
 
 	// +operator-sdk:csv:customresourcedefinitions:type=status,displayName="Service Binding"
 	Binding *corev1.LocalObjectReference `json:"binding,omitempty"`
+
+	References common.StatusReferences `json:"references,omitempty"`
 }
 
 // Defines possible status conditions.
@@ -539,6 +543,11 @@ func (cr *RuntimeComponent) GetAffinity() common.BaseComponentAffinity {
 		return nil
 	}
 	return cr.Spec.Affinity
+}
+
+// GetAffinity returns deployment's node and pod affinity settings
+func (cr *RuntimeComponent) GetManageTLS() *bool {
+	return cr.Spec.ManageTLS
 }
 
 // GetDeployment returns deployment settings
@@ -914,6 +923,24 @@ func (s *RuntimeComponentStatus) SetCondition(c common.StatusCondition) {
 	if !found {
 		s.Conditions = append(s.Conditions, *condition)
 	}
+}
+
+func (s *RuntimeComponentStatus) GetReferences() common.StatusReferences {
+	if s.References == nil {
+		s.References = make(common.StatusReferences)
+	}
+	return s.References
+}
+
+func (s *RuntimeComponentStatus) SetReferences(refs common.StatusReferences) {
+	s.References = refs
+}
+
+func (s *RuntimeComponentStatus) SetReference(name string, value string) {
+	if s.References == nil {
+		s.References = make(common.StatusReferences)
+	}
+	s.References[name] = value
 }
 
 func convertToCommonStatusConditionType(c StatusConditionType) common.StatusConditionType {

@@ -12,6 +12,12 @@ import (
 // StatusConditionType ...
 type StatusConditionType string
 
+type StatusReferences map[string]string
+
+const (
+	StatusReferenceCertSecretName = "svcCertSecretName"
+)
+
 // StatusCondition ...
 type StatusCondition interface {
 	GetLastTransitionTime() *metav1.Time
@@ -40,6 +46,9 @@ type BaseComponentStatus interface {
 	SetImageReference(string)
 	GetBinding() *corev1.LocalObjectReference
 	SetBinding(*corev1.LocalObjectReference)
+	GetReferences() StatusReferences
+	SetReferences(StatusReferences)
+	SetReference(string, string)
 }
 
 const (
@@ -150,4 +159,5 @@ type BaseComponent interface {
 	GetGroupName() string
 	GetRoute() BaseComponentRoute
 	GetAffinity() BaseComponentAffinity
+	GetManageTLS() *bool
 }
